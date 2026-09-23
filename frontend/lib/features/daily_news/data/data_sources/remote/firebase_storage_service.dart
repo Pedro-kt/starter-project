@@ -28,7 +28,11 @@ class FirebaseStorageServiceImpl implements FirebaseStorageService {
       final path = '$_thumbnailPath/$articleId/thumbnail';
       final ref = _storage.ref().child(path);
 
-      final uploadTask = ref.putFile(file);
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'uploaded_by': 'user'},
+      );
+      final uploadTask = ref.putFile(file, metadata);
 
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((event) {
@@ -38,9 +42,12 @@ class FirebaseStorageServiceImpl implements FirebaseStorageService {
 
       await uploadTask;
 
-      return await ref.getDownloadURL();
+      final downloadUrl = await ref.getDownloadURL();
+      return downloadUrl;
     } on FirebaseException catch (e) {
       throw Exception('Failed to upload thumbnail: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to upload thumbnail: $e');
     }
   }
 
