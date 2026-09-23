@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/daily_news/domain/entities/article.dart';
+import '../../features/daily_news/presentation/bloc/upload_article/upload_article_cubit.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/daily_news/presentation/pages/upload_article_screen.dart';
 import '../../features/daily_news/presentation/pages/user_articles_screen.dart';
+import '../../injection_container.dart';
 
 class AppRoutes {
   static const String home = '/';
@@ -28,7 +31,12 @@ class AppRoutes {
         return _materialRoute(const SavedArticles());
 
       case uploadArticle:
-        return _materialRoute(const UploadArticleScreen());
+        return _materialRoute(
+          BlocProvider<UploadArticleCubit>(
+            create: (context) => sl<UploadArticleCubit>(),
+            child: const UploadArticleScreen(),
+          ),
+        );
 
       case userArticles:
         final userId = settings.arguments as String?;

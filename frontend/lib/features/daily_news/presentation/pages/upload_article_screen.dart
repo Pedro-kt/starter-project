@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/upload_article/upload_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/upload_article/upload_article_state.dart';
 
@@ -17,9 +19,10 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
   final _authorController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _thumbnailUrlController = TextEditingController();
+  final _imagePicker = ImagePicker();
 
   bool _isPublished = true;
+  XFile? _selectedImage;
 
   @override
   void dispose() {
@@ -28,8 +31,16 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
     _authorController.dispose();
     _descriptionController.dispose();
     _categoryController.dispose();
-    _thumbnailUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImage = image;
+      });
+    }
   }
 
   void _handleUpload() {
@@ -37,8 +48,8 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
       return;
     }
 
-    if (_thumbnailUrlController.text.isEmpty) {
-      _showErrorSnackBar('Please enter a thumbnail URL');
+    if (_selectedImage == null) {
+      _showErrorSnackBar('Please select an image');
       return;
     }
 
@@ -46,7 +57,7 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
           title: _titleController.text,
           content: _contentController.text,
           author: _authorController.text,
-          thumbnailPath: _thumbnailUrlController.text,
+          thumbnailPath: _selectedImage!.path,
           description: _descriptionController.text.isEmpty
               ? null
               : _descriptionController.text,
@@ -131,22 +142,51 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
   }
 
   Widget _buildThumbnailField() {
-    return TextFormField(
-      controller: _thumbnailUrlController,
-      decoration: const InputDecoration(
-        labelText: 'Thumbnail URL',
-        hintText: 'Enter image URL (e.g., https://...)',
-        border: OutlineInputBorder(),
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: _selectedImage == null
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.image,
+                    size: 48,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Tap to select thumbnail',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              )
+            : Column(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      File(_selectedImage!.path),
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _selectedImage!.name,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Thumbnail URL is required';
-        }
-        if (!value.startsWith('http')) {
-          return 'URL must start with http or https';
-        }
-        return null;
-      },
     );
   }
 
@@ -293,8 +333,8 @@ class _UploadArticleScreenState extends State<UploadArticleScreen> {
     _authorController.clear();
     _descriptionController.clear();
     _categoryController.clear();
-    _thumbnailUrlController.clear();
     setState(() {
+      _selectedImage = null;
       _isPublished = true;
     });
   }
