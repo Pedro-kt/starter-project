@@ -106,11 +106,23 @@ class ArticleRepositoryImpl implements ArticleRepository {
   @override
   Future<DataState<ArticleEntity>> updateArticle(UpdateArticleParams params) async {
     try {
+      String? thumbnailUrl;
+
+      if (params.thumbnailPath != null) {
+        final thumbnailFile = File(params.thumbnailPath!);
+        thumbnailUrl = await _storageService.uploadThumbnail(
+          thumbnailFile,
+          params.articleId,
+        );
+      }
+
       final articleModel = ArticleModel(
         title: params.title,
         content: params.content,
+        author: params.author,
         description: params.description,
         category: params.category,
+        thumbnailURL: thumbnailUrl,
       );
 
       await _firestoreService.updateArticle(params.articleId, articleModel);

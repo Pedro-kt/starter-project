@@ -32,15 +32,19 @@ class UpdateArticleParams extends Equatable {
   final String articleId;
   final String title;
   final String content;
+  final String author;
   final String? description;
   final String? category;
+  final String? thumbnailPath;
 
   const UpdateArticleParams({
     required this.articleId,
     required this.title,
     required this.content,
+    required this.author,
     this.description,
     this.category,
+    this.thumbnailPath,
   });
 
   @override
@@ -48,8 +52,10 @@ class UpdateArticleParams extends Equatable {
         articleId,
         title,
         content,
+        author,
         description,
         category,
+        thumbnailPath,
       ];
 }
 

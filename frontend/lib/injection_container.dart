@@ -16,6 +16,7 @@ import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article_management/article_management_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/upload_article/upload_article_cubit.dart';
+import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/edit_article/edit_article_cubit.dart';
 import 'features/daily_news/data/data_sources/local/app_database.dart';
 import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
@@ -112,6 +113,11 @@ Future<void> initializeDependencies() async {
       deleteArticleUseCase: sl(),
       updatePublishStatusUseCase: sl(),
     ),
+  );
+
+  // Cubits - Edit Article Feature
+  sl.registerFactory<EditArticleCubit>(
+    () => EditArticleCubit(updateArticleUseCase: sl()),
   );
 
 }
