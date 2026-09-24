@@ -41,8 +41,13 @@ void main() {
       when(() => mockUploadArticleUseCase(params: any(named: 'params')))
           .thenAnswer((_) async => DataSuccess(testArticle));
 
-      final states = <UploadArticleState>[];
-      uploadArticleCubit.stream.listen(states.add);
+      expectLater(
+        uploadArticleCubit.stream,
+        emitsInOrder([
+          isA<UploadArticleLoading>(),
+          isA<UploadArticleSuccess>(),
+        ]),
+      );
 
       await uploadArticleCubit.uploadArticle(
         title: 'Test Title',
@@ -50,11 +55,6 @@ void main() {
         author: 'Test Author',
         thumbnailPath: '/path/to/image.jpg',
       );
-
-      expect(states, [
-        isA<UploadArticleLoading>(),
-        isA<UploadArticleSuccess>(),
-      ]);
     });
 
     test('emits Loading then Failure when upload fails', () async {
@@ -65,8 +65,13 @@ void main() {
       when(() => mockUploadArticleUseCase(params: any(named: 'params')))
           .thenAnswer((_) async => DataFailed(testError));
 
-      final states = <UploadArticleState>[];
-      uploadArticleCubit.stream.listen(states.add);
+      expectLater(
+        uploadArticleCubit.stream,
+        emitsInOrder([
+          isA<UploadArticleLoading>(),
+          isA<UploadArticleFailure>(),
+        ]),
+      );
 
       await uploadArticleCubit.uploadArticle(
         title: 'Test Title',
@@ -74,19 +79,19 @@ void main() {
         author: 'Test Author',
         thumbnailPath: '/path/to/image.jpg',
       );
-
-      expect(states, [
-        isA<UploadArticleLoading>(),
-        isA<UploadArticleFailure>(),
-      ]);
     });
 
     test('emits Loading then Failure on exception', () async {
       when(() => mockUploadArticleUseCase(params: any(named: 'params')))
           .thenThrow(Exception('Network error'));
 
-      final states = <UploadArticleState>[];
-      uploadArticleCubit.stream.listen(states.add);
+      expectLater(
+        uploadArticleCubit.stream,
+        emitsInOrder([
+          isA<UploadArticleLoading>(),
+          isA<UploadArticleFailure>(),
+        ]),
+      );
 
       await uploadArticleCubit.uploadArticle(
         title: 'Test Title',
@@ -94,11 +99,6 @@ void main() {
         author: 'Test Author',
         thumbnailPath: '/path/to/image.jpg',
       );
-
-      expect(states, [
-        isA<UploadArticleLoading>(),
-        isA<UploadArticleFailure>(),
-      ]);
     });
 
     test('resetState emits UploadArticleInitial', () {
